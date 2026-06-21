@@ -83,7 +83,9 @@
     font-size: 0.65rem;
     opacity: 0.6;
   }
-  .tier-header.collapsed .chevron { transform: rotate(-90deg); }
+  .tier-header.collapsed .chevron,
+  .tier-header-row.collapsed .chevron { transform: rotate(-90deg); }
+  .tier-header-row { cursor: pointer; }
 
   /* Table */
   .kw-table {
@@ -102,6 +104,9 @@
     text-align: left;
     white-space: nowrap;
     border-right: 1px solid #4a3838;
+    position: sticky;
+    top: 0;
+    z-index: 3;
   }
   .kw-table th:last-child { border-right: none; }
   .kw-table td {
@@ -557,8 +562,7 @@ function renderTable() {
         <th class="hide-tablet">Preferred Page</th>
         <th class="hide-mobile">Status</th>
       </tr>
-    </thead>
-    <tbody>`;
+    </thead>`;
 
   for (const tierKey of tiers) {
     const tier = snap.tiers[tierKey];
@@ -568,14 +572,22 @@ function renderTable() {
     const rankCnt  = kws.filter(k => k.position_ca > 0).length;
     const tierId   = `tier-body-${tierKey}`;
 
-    html += `</tbody></table>
-    <div class="tier-header" onclick="toggleTier('${tierId}', this)">
-      <span class="chevron">▼</span>
-      ${tier.label}
-      <span class="tier-count">(${kws.length} keywords)</span>
-      <span class="tier-ranked-badge">${rankCnt} ranked</span>
-    </div>
-    <table class="kw-table"><tbody id="${tierId}">`;
+    // Each tier gets its own <tbody> (valid HTML, multiple per table) so the
+    // collapse toggle still works — but it's all ONE <table>, sharing the
+    // single <thead> above, so column widths stay aligned across tiers.
+    html += `<tbody>
+      <tr class="tier-header-row" onclick="toggleTier('${tierId}', this)">
+        <td colspan="7" style="padding:0">
+          <div class="tier-header">
+            <span class="chevron">▼</span>
+            ${tier.label}
+            <span class="tier-count">(${kws.length} keywords)</span>
+            <span class="tier-ranked-badge">${rankCnt} ranked</span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+    <tbody id="${tierId}">`;
 
     for (const kw of kws) {
       const pos_ca  = fmtPos(kw.position_ca);
@@ -614,9 +626,11 @@ function renderTable() {
         <td class="hide-mobile"><span class="${status}">${statusLabel}</span></td>
       </tr>`;
     }
+
+    html += '</tbody>';
   }
 
-  html += '</tbody></table>';
+  html += '</table>';
   document.getElementById('table-area').innerHTML = html;
 }
 
