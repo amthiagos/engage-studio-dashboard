@@ -353,10 +353,11 @@
 <!-- ── Tier tabs ─────────────────────────────────────────────────── -->
 <div class="tab-bar">
   <div class="tab active" data-tier="all" onclick="selectTier(this)">All tiers</div>
-  <div class="tab" data-tier="tier_1_executive" onclick="selectTier(this)">T1 · Executive</div>
-  <div class="tab" data-tier="tier_2_core"      onclick="selectTier(this)">T2 · Core</div>
-  <div class="tab" data-tier="tier_3_stone_style" onclick="selectTier(this)">T3 · Stone & Style</div>
-  <div class="tab" data-tier="tier_4_blog"      onclick="selectTier(this)">T4 · Blog</div>
+  <div class="tab" data-tier="tier_1" onclick="selectTier(this)">T1 · Executive</div>
+  <div class="tab" data-tier="tier_2" onclick="selectTier(this)">T2 · Core</div>
+  <div class="tab" data-tier="tier_3" onclick="selectTier(this)">T3 · Stone & Style</div>
+  <div class="tab" data-tier="tier_4" onclick="selectTier(this)">T4 · Blog</div>
+  <div class="tab" data-tier="untagged" onclick="selectTier(this)">Untagged</div>
 </div>
 
 <!-- ── Keyword table ─────────────────────────────────────────────── -->
@@ -397,7 +398,7 @@ let state = {
   chart: null,
 };
 
-const TIER_ORDER = ['tier_1_executive', 'tier_2_core', 'tier_3_stone_style', 'tier_4_blog'];
+const TIER_ORDER = ['tier_1', 'tier_2', 'tier_3', 'tier_4', 'untagged'];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function fmtVol(v)  { return (v > 0) ? v.toLocaleString() : '—'; }
@@ -492,7 +493,7 @@ function computeStats() {
 function renderStats() {
   const snap = SNAPSHOTS[state.currentDate];
   const d = snap ? snap.generated_at : '—';
-  const displayDate = d !== '—' ? new Date(d).toLocaleDateString('en-CA', { month:'long', day:'numeric', year:'numeric' }) : '—';
+  const displayDate = d !== '—' ? new Date(d).toLocaleDateString('en-CA', { month:'long', day:'numeric', year:'numeric', timeZone:'UTC' }) : '—';
   document.getElementById('last-updated').textContent = `Updated: ${displayDate}`;
 
   const s = computeStats();
@@ -524,7 +525,7 @@ function renderSelectors() {
   cmp.innerHTML  = '<option value="">No comparison</option>';
 
   DATES.forEach(d => {
-    const label = new Date(d).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' });
+    const label = new Date(d).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric', timeZone:'UTC' });
     curr.innerHTML += `<option value="${d}" ${d === state.currentDate ? 'selected':''}>${label}</option>`;
     cmp.innerHTML  += `<option value="${d}" ${d === state.compareDate ? 'selected':''}>${label}</option>`;
   });
@@ -708,7 +709,7 @@ function openModal(keyword) {
   chartInst = new Chart(document.getElementById('trendline-chart'), {
     type: 'line',
     data: {
-      labels: chartDates.map(d => new Date(d).toLocaleDateString('en-CA', { month:'short', day:'numeric' })),
+      labels: chartDates.map(d => new Date(d).toLocaleDateString('en-CA', { month:'short', day:'numeric', timeZone:'UTC' })),
       datasets: [{
         label: 'Position CA',
         data: chartPositions,
@@ -770,7 +771,7 @@ function openModal(keyword) {
   [...history].reverse().forEach(h => {
     const d = h.data;
     histHtml += `<tr>
-      <td>${new Date(h.date).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' })}</td>
+      <td>${new Date(h.date).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric', timeZone:'UTC' })}</td>
       <td>${d && d.position_ca   ? `#${d.position_ca}`   : '—'}</td>
       <td>${d && d.position_global ? `#${d.position_global}` : '—'}</td>
       <td>${d ? fmtVol(d.volume_ca) : '—'}</td>
